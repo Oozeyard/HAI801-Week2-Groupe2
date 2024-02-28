@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morpion avec Minimax</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 20px;
+        }
+
+        button {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<table id="morpion">
+    <tr>
+        <td onclick="placeSymbol(this)"></td>
+        <td onclick="placeSymbol(this)"></td>
+        <td onclick="placeSymbol(this)"></td>
+    </tr>
+    <tr>
+        <td onclick="placeSymbol(this)"></td>
+        <td onclick="placeSymbol(this)"></td>
+        <td onclick="placeSymbol(this)"></td>
+    </tr>
+    <tr>
+        <td onclick="placeSymbol(this)"></td>
+        <td onclick="placeSymbol(this)"></td>
+        <td onclick="placeSymbol(this)"></td>
+    </tr>
+</table>
+
+Jouer Courrant : 
+<p id="CurrentPlayer"></p>
+
+<button onclick="runMinimax()">Exécuter Minimax</button>
+<button onclick="resetGame()">Réinitialiser le jeu</button>
+
+<div style="display: block;">
+
+    <button onclick="remplirGrille([
+                        ['X', 'O', ''],
+                        ['O', 'X', ''],
+                        ['', '', '']    
+                        ], 'X')">Grille 1</button>
+    <button onclick="remplirGrille([
+    ['', 'O', 'X'],
+    ['', '', ''],
+    ['X', '', 'O']    
+    ], 'O')">Grille 2</button>
+    <button onclick="remplirGrille([
+    ['X', 'O', 'X'],
+    ['O', 'X', 'O'],
+    ['', 'X', 'O']    
+    ], 'X')">Grille 3</button>
+    <button onclick="remplirGrille([
+    ['X', 'O', 'X'],
+    ['O', 'X', ''],
+    ['', 'O', '']    
+    ], 'O')">Grille 4</button>
+    <button onclick="remplirGrille([
+    ['O', 'O', ''],
+    ['X', 'X', ''],
+    ['', '', 'X']    
+    ], 'O')">Grille 5</button>
+    <button onclick="remplirGrille([
+    ['X', 'O', ''],
+    ['', 'X', ''],
+    ['X', '', 'O']    
+    ], 'O')">Grille 6</button>
+
+</div>
+
+<script>
+    let currentPlayerText = document.getElementById('CurrentPlayer'); 
+    let currentPlayer = 'X';
+    currentPlayerText.innerHTML = currentPlayer;
+    let board = [
+        ['', '', ''],
+        ['', '', ''],
+        ['', '', '']
+    ];
+
+    function remplirGrille(newBoard, newCurrentPlayer){
+        currentPlayer = newCurrentPlayer;
+        currentPlayerText.innerHTML = currentPlayer;
+        board = newBoard;
+
+        for(let i=0; i<3; i++){
+            for(let j=0; j<3; j++){
+                if(board[i][j] != '') {
+                    cell = document.getElementById('morpion').rows[i].cells[j];
+                    cell.innerHTML = board[i][j];
+                }
+            }
+        }
+    }
+
+    function placeSymbol(cell) {
+        const row = cell.parentNode.rowIndex;
+        const col = cell.cellIndex;
+
+        if (cell.innerHTML === '' && currentPlayer === 'O') {
+            cell.innerHTML = 'O';
+            board[row][col] = 'O';
+            currentPlayer = 'X';
+            currentPlayerText.innerHTML = currentPlayer;
+        } else if (cell.innerHTML === '' && currentPlayer === 'X') {
+            cell.innerHTML = 'X';
+            board[row][col] = 'X';
+            currentPlayer = 'O';
+            currentPlayerText.innerHTML = currentPlayer;
+        }
+
+        if (checkWinner('X')) {
+        setTimeout(function() {
+            alert("Joueur X a gagné !");
+        }, 0);
+        } else if (checkWinner('O')) {
+            setTimeout(function() {
+                alert("Joueur O a gagné !");
+            }, 0);
+        } else if (checkDraw()) {
+            setTimeout(function() {currentPlayerText.innerHTML = currentPlayer;
+                alert("Match nul !");
+            }, 0);
+        }
+    }
+
+    function checkWinner(player) {
+        for (let i = 0; i < 3; i++) {
+            if (
+                (board[i][0] === player && board[i][1] === player && board[i][2] === player) ||
+                (board[0][i] === player && board[1][i] === player && board[2][i] === player)
+            ) {
+                return true;
+            }
+        }
+
+        if (
+            (board[0][0] === player && board[1][1] === player && board[2][2] === player) ||
+            (board[0][2] === player && board[1][1] === player && board[2][0] === player)
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function checkDraw() {
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (board[i][j] === '') {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    function resetGame() {
+        board = [
+            ['', '', ''],
+            ['', '', ''],
+            ['', '', '']
+        ];
+
+        currentPlayer = 'X';
+
+        const cells = document.getElementsByTagName('td');
+        for (let cell of cells) {
+            cell.innerHTML = '';
+        }
+    }
+
+    function runMinimax() {
+        const bestMove = getBestMove();
+        if (bestMove) {
+            const [row, col] = bestMove;
+            const cell = document.getElementById('morpion').rows[row].cells[col];
+
+
+            if (cell.innerHTML === '' && currentPlayer === 'O') {
+                cell.innerHTML = 'O';
+                board[row][col] = 'O';
+                currentPlayer = 'X';
+                currentPlayerText.innerHTML = currentPlayer;
+            } else if (cell.innerHTML === '' && currentPlayer === 'X') {
+                cell.innerHTML = 'X';
+                board[row][col] = 'X';
+                currentPlayer = 'O';
+                currentPlayerText.innerHTML = currentPlayer;
+            }
+
+            if (checkWinner('X')) {
+            setTimeout(function() {
+                alert("Joueur X a gagné !");
+            }, 0);
+            } else if (checkWinner('O')) {
+                setTimeout(function() {
+                    alert("Joueur O a gagné !");
+                }, 0);
+            } else if (checkDraw()) {
+                setTimeout(function() {
+                    alert("Match nul !");
+                }, 0);
+            }
+        }
+    }
+
+
+    function getBestMove() {
+        // Fonction Minimax simplifiée (non optimale) pour le morpion
+        let bestScore = -Infinity;
+        let bestMove = null;
+
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (board[i][j] === '') {
+                    board[i][j] = 'O';
+                    const score = minimax(board, 0, false);
+                    board[i][j] = '';
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = [i, j];
+                    }
+                }
+            }
+        }
+
+        return bestMove;
+    }
+
+    function minimax(board, depth, isMaximizing) {
+        const scores = {
+            'X': -1,
+            'O': 1,
+            'tie': 0
+        };
+
+        const winner = checkWinner('X') ? 'X' : checkWinner('O') ? 'O' : null;
+        if (winner !== null) {
+            return scores[winner];
+        }
+
+        if (checkDraw()) {
+            return scores['tie'];
+        }
+
+        if (isMaximizing) {
+            let bestScore = -Infinity;
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (board[i][j] === '') {
+                        board[i][j] = 'O';
+                        const score = minimax(board, depth + 1, false);
+                        board[i][j] = '';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+            }
+            return bestScore;
+        } else {
+            let bestScore = Infinity;
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (board[i][j] === '') {
+                        board[i][j] = 'X';
+                        const score = minimax(board, depth + 1, true);
+                        board[i][j] = '';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+            }
+            return bestScore;
+        }
+    }
+</script>
+
+</body>
+</html>
