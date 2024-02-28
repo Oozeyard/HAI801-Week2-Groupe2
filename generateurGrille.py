@@ -9,8 +9,9 @@ def generate_tic_tac_toe_boards(board, player, all_boards):
         if board[i] == " ":  # Vérifier si la case est vide
             new_board = list(board)  # Créer une nouvelle grille basée sur l'ancienne
             new_board[i] = player  # Placer le symbole du joueur dans la case
-            all_boards.append("".join(new_board))  # Ajouter la nouvelle grille à la liste
+            #if new_board not in all_boards:
 
+            all_boards.append("".join(new_board))  # Ajouter la nouvelle grille à la liste
             # Changer de joueur pour le prochain coup
             next_player = "X" if player == "O" else "O"
             # Rappel récursif pour générer les grilles possibles après ce coup
